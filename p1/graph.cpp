@@ -28,6 +28,16 @@ void graph::order(vector<vertexDegree>& ordered_vertices){
   sort(ordered_vertices.begin(), ordered_vertices.end()); 
 }
 
+// prints graph on console
+void graph::print(){
+  for (map<int,set<int> >::iterator it=graph_container.begin(); it!=graph_container.end(); ++it){
+    cout << it->first << "|";
+    for (set<int>:: iterator ti=it->second.begin(); ti!=it->second.end(); ++ti){
+      cout << *ti << " ";
+    }
+    cout << endl; 
+  }
+}
 
 // load a graph from dimacs file
 graph * load_graph(string file) {
@@ -36,14 +46,13 @@ graph * load_graph(string file) {
   string resto; 
   ifstream data;
   string rest; 
-  graph * instance; 
+  graph * instance = new graph(); 
 
   data.open(file.c_str());
   if (data.is_open()) {
     string line;
     while (data.good()) {
       getline(data, line);
-      
       if (line.substr(0, 1) != "e") {
         // comments or other info
         continue;
@@ -57,7 +66,6 @@ graph * load_graph(string file) {
         rest = line.substr(pos_space+1, line.length());
         istringstream t(rest);
         t >> v2;
-        instance = new graph();
         instance->add_edge(v1, v2);
       }   
     }      

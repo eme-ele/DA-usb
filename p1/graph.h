@@ -23,6 +23,7 @@ class graph {
   public:
     void add_edge(int v1, int v2);
     void order(vector<vertexDegree>& ordered_vertices); 
+    void print();
 }; 
 
 // loads graph from dimacs file
