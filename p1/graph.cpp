@@ -58,7 +58,7 @@ graph * load_graph(string file) {
         istringstream t(rest);
         t >> v2;
         instance = new graph();
-        (*instance).add_edge(v1, v2);
+        instance->add_edge(v1, v2);
       }   
     }      
   } 
