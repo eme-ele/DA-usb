@@ -5,7 +5,7 @@ using namespace std;
 // add edge to graph 
 void graph::add_edge(int v1, int v2){
       // v1 -> v2
-      std::set<int> adjacent; 
+      set<int> adjacent; 
       adjacent = graph_container[v1];
       adjacent.insert(v2);
       graph_container[v1] = adjacent;
@@ -13,6 +13,19 @@ void graph::add_edge(int v1, int v2){
       adjacent = graph_container[v2];
       adjacent.insert(v1);
       graph_container[v2] = adjacent; 
+}
+
+// fill a vector with vertices ordered by decreasing degree
+void graph::order(vector<vertexDegree>& ordered_vertices){
+  vertexDegree v; 
+  //populate vertexDegree vector from graph
+  for(map<int, set<int> >::iterator it = graph_container.begin(); 
+      it != graph_container.end(); ++it) {
+      v.vertex = it->first;
+      v.degree = it->second.size();
+      ordered_vertices.push_back(v);
+  }
+  sort(ordered_vertices.begin(), ordered_vertices.end()); 
 }
 
 
