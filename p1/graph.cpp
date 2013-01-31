@@ -4,6 +4,7 @@ using namespace std;
 
 graph::graph(int num_nodes){
   graph_container.resize(num_nodes);
+  colors.resize(num_nodes);
 }
 
 // add edge to graph 
@@ -20,22 +21,7 @@ void graph::add_edge(int v1, int v2){
       graph_container[v2] = adjacent; 
 }
 
-bool decreasing(vertexDegree a, vertexDegree b){
-  return a.degree > b.degree;
-}
-
-// fill a vector with vertices ordered by decreasing degree
-void graph::order(vector<vertexDegree>& ordered_vertices){
-  vertexDegree v; 
-  //populate vertexDegree vector from graph
-  for(int i=1; i < graph_container.size(); i++) {
-      v.vertex = i;
-      v.degree = graph_container[i].size();
-      ordered_vertices.push_back(v);
-  }
-    sort(ordered_vertices.begin(), ordered_vertices.end(), decreasing); 
-}
-
+// return all vertices adjacent to v
 void graph::get_neighbours(int v, set<int>& neighbours) {
   neighbours = graph_container[v];
 }
@@ -50,6 +36,92 @@ void graph::print(){
     cout << endl; 
   }
 }
+
+// sets color to vertex
+void graph::set_color(int v, int k){
+  colors[v] = k;
+}
+
+// returns coloring of a given vertex
+int graph::get_color(int v){
+  return colors[v];
+}
+
+int graph::degree(int v){
+  return graph_container[v].size();
+}
+
+//returns uncolored vertex with max degree
+int graph::max_degree(){
+  int max = graph_container[1].size();
+  int vertex = 1;
+  for(int i=2; i<graph_container.size(); i++){
+    if (graph_container[i].size() > max && colors[i] == 0){
+      max = graph_container[i].size();
+      vertex = i;
+    }
+  }
+  return vertex;
+}
+
+// returns number of nodes 
+int graph::num_nodes(){
+  return graph_container.size();
+}
+
+// returns saturation of a given vertex
+int graph::saturation(int v){
+  set<int> diff_colors;
+  for(set<int>::iterator it=graph_container[v].begin(); it!=graph_container[v].end(); ++it){
+    if (colors[*it] != 0){
+      diff_colors.insert(colors[*it]);
+    }
+  }
+  return diff_colors.size();
+}
+
+//returns uncolored vertex with max saturation
+int graph::max_saturation(){
+  int new_sat;
+  int max = saturation(1);
+  int vertex = 1;
+  for(int i=2; i<graph_container.size(); i++){
+    new_sat = saturation(i);
+    if ( new_sat > max && colors[i] == 0){
+      max = new_sat;
+      vertex = i;
+    }
+  }
+  return vertex;
+}
+
+// returns incidence of a given vertex
+int graph::incidence(int v){
+  int num_colored = 0;
+  for(set<int>::iterator it=graph_container[v].begin(); it!=graph_container[v].end(); ++it){
+    if (colors[*it] != 0){
+      num_colored++;
+    }
+  }
+  return num_colored;
+}
+
+//return uncolored vertex with max incidence
+int graph::max_incidence(){
+  int new_sat;
+  int max = incidence(1);
+  int vertex = 1;
+  for(int i=2; i<graph_container.size(); i++){
+    new_sat = incidence(i);
+    if ( new_sat > max && colors[i] == 0){
+      max = new_sat;
+      vertex = i;
+    }
+  }
+  return vertex;
+
+}
+
 
 // load a graph from dimacs file
 graph * load_graph(string file) {
@@ -103,5 +175,6 @@ graph * load_graph(string file) {
   data.close();
   return instance; 
 }
+
 
 

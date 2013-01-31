@@ -8,25 +8,24 @@
 
 using namespace std;
 
-struct vertexDegree {
-  int vertex; 
-  int degree;
-  int color;
-  // default init
-  vertexDegree(){
-    color = -1;
-  }
-}; 
-
 class graph {
   private:
     vector<set<int> > graph_container;
+    vector<int> colors; 
   public:
     graph(int num_nodes);
-    void add_edge(int v1, int v2);
-    void order(vector<vertexDegree>& ordered_vertices); 
+    void add_edge(int v1, int v2); 
     void get_neighbours(int v, set<int>& neighbours);
     void print();
+    void set_color(int v, int k);
+    int get_color(int v);
+    int degree(int v);
+    int max_degree();
+    int num_nodes();
+    int saturation(int v);
+    int incidence(int v);
+    int max_saturation();
+    int max_incidence();
 }; 
 
 // loads graph from dimacs file
