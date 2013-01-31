@@ -10,6 +10,8 @@ int main(int argc, char** argv) {
   vector<vertexDegree> ordered_vertices;
   instance->order(ordered_vertices);
 
-}
+  //instance->print();
+  
+ }
 
 

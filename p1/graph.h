@@ -19,10 +19,12 @@ struct vertexDegree {
 
 class graph {
   private:
-    map<int, std::set<int> > graph_container;
+    vector<set<int> > graph_container;
   public:
+    graph(int num_nodes);
     void add_edge(int v1, int v2);
     void order(vector<vertexDegree>& ordered_vertices); 
+    void get_neighbours(int v, set<int>& neighbours);
     void print();
 }; 
 
