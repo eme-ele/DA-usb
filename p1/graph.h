@@ -11,10 +11,11 @@ using namespace std;
 struct vertexDegree {
   int vertex; 
   int degree;
-  friend bool operator<(vertexDegree a, vertexDegree b){
-        return a.degree > b.degree;
-    }
-  
+  int color;
+  // default init
+  vertexDegree(){
+    color = -1;
+  }
 }; 
 
 class graph {

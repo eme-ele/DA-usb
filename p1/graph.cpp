@@ -20,6 +20,10 @@ void graph::add_edge(int v1, int v2){
       graph_container[v2] = adjacent; 
 }
 
+bool decreasing(vertexDegree a, vertexDegree b){
+  return a.degree > b.degree;
+}
+
 // fill a vector with vertices ordered by decreasing degree
 void graph::order(vector<vertexDegree>& ordered_vertices){
   vertexDegree v; 
@@ -29,7 +33,7 @@ void graph::order(vector<vertexDegree>& ordered_vertices){
       v.degree = graph_container[i].size();
       ordered_vertices.push_back(v);
   }
-  sort(ordered_vertices.begin(), ordered_vertices.end()); 
+    sort(ordered_vertices.begin(), ordered_vertices.end(), decreasing); 
 }
 
 void graph::get_neighbours(int v, set<int>& neighbours) {
