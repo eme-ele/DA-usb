@@ -1,9 +1,11 @@
+#include <stdlib.h>
 #include <iostream>
 #include <map>
 #include <set>
 #include <vector>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <fstream>
 
 using namespace std;
@@ -13,6 +15,7 @@ class graph {
     vector<set<int> > graph_container;
     vector<int> colors; 
   public:
+    graph();
     graph(int num_nodes);
     void add_edge(int v1, int v2); 
     void get_neighbours(int v, set<int>& neighbours);
