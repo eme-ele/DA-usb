@@ -21,12 +21,12 @@ int getLegalColor(graph* graphInstance,int vertex){
 			// Get color of the vertex identified with 'it'
 			int c = graphInstance->get_color(*it);
 			if(c != 0){ 
-		// Is colored
-			  if(c == i){
-			// Try another color
-			valid = 0;
-		}
-		}
+				// Is colored
+				if(c == i){
+					// Try another color
+					valid = 0;
+				}
+			}
 		}
 		if(valid == 1) break;
 	}
@@ -88,6 +88,7 @@ int main(int argc,char *argv[]){
 	}
 	
 	// Parse input file
+	cout << "\nCargando grafo..." << endl;
 	graph *graphInstance = load_graph(argv[2]);
 	double secs;
 	
