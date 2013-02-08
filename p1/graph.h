@@ -20,6 +20,7 @@ class graph {
     void add_edge(int v1, int v2); 
     void get_neighbours(int v, set<int>& neighbours);
     void print();
+	void print_colors();
     void set_color(int v, int k);
     int get_color(int v);
     int degree(int v);
@@ -29,6 +30,7 @@ class graph {
     int incidence(int v);
     int max_saturation();
     int max_incidence();
+	int diff_colors();
 }; 
 
 // loads graph from dimacs file
