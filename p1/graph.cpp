@@ -46,7 +46,7 @@ void graph::print(){
 
 void graph::print_colors(){
 	for(int i=1; i< graph_container.size(); i++){
-		cout << "\t" <<  i << "|" << colors[i] << " ";
+		cout << "\t" <<  i << "|" << colors[i];
 		if (i % 10 == 0){
 			cout << endl;
 		}
@@ -120,7 +120,6 @@ int graph::incidence(int v){
 			num_colored++;
 		}
 	}
-//	cout << "incidence: " << num_colored << endl;
 	return num_colored;
 }
 
@@ -136,7 +135,6 @@ int graph::max_incidence(){
 			vertex = i;
 		}
 	}
-//	cout << "Max incidence: " << vertex << endl;
 	return vertex;
 
 }
