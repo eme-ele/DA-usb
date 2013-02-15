@@ -54,7 +54,7 @@ double greedyColoring(graph* graphInstance, int flag){
 	double secs;
 
 	gettimeofday(&t_ini, NULL);
-	for(int i=0;i < n; i++){
+	for(int i=1;i <= n; i++){
 		if (flag == 0){
 			vertex = i; 								// for First Fit
 		} else if (flag == 1){
@@ -72,6 +72,46 @@ double greedyColoring(graph* graphInstance, int flag){
 	gettimeofday(&t_fin, NULL);	
 	return timeval_diff(&t_fin, &t_ini);
 }
+
+int greedyIndependentSet(graph * graphInstance, set<int>& independent, set<int>& uncolored){
+	set <int> u (uncolored);
+	int arbitrary_vertex;
+
+	while(!u.empty()){
+		arbitrary_vertex = *u.begin();
+		independent.insert(arbitrary_vertex); 
+		set<int> neighbours;
+		graphInstance->get_neighbours(arbitrary_vertex, neighbours);
+		u.erase(arbitrary_vertex);
+		for(set<int>::iterator it=neighbours.begin(); it != neighbours.end(); ++it) {
+			u.erase(*it);
+		}
+	}
+	return 0;
+}
+
+double independentSetBasedColoring(graph * graphInstance){
+	set <int> uncolored; 
+	graphInstance -> get_uncolored(uncolored);
+	int color = 1;
+	struct timeval t_ini, t_fin;
+	double secs;
+
+	gettimeofday(&t_ini, NULL);
+	while(!uncolored.empty()){
+		set<int> independent;
+		greedyIndependentSet(graphInstance, independent, uncolored);
+		for(set<int>::iterator it = independent.begin(); it != independent.end(); ++it){
+			graphInstance->set_color(*it, color);
+			uncolored.erase(*it);
+		}
+		color++;		
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+
+}
+
 
 // error message
 int print_use(){
@@ -111,6 +151,7 @@ int main(int argc,char *argv[]){
 	}else if(strcmp(argv[1],"-b")==0){
 		// Run Independent Set Based Coloring Algorithm
 		cout<<endl<<"Ejecutando algoritmo Independent Set Based Coloring..."<<endl;
+		secs = independentSetBasedColoring(graphInstance);
 		// TO DO
 	}else{
 		return -1;

@@ -19,6 +19,7 @@ class graph {
     graph(int num_nodes);
     void add_edge(int v1, int v2); 
     void get_neighbours(int v, set<int>& neighbours);
+	void get_uncolored(set<int>& uncolored);
     void print();
 	void print_colors();
     void set_color(int v, int k);

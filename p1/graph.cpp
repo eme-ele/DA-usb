@@ -25,6 +25,14 @@ void graph::get_neighbours(int v, set<int>& neighbours) {
 	neighbours = graph_container[v];
 }
 
+void graph::get_uncolored(set<int>& uncolored) {
+	for(int i=1; i<graph_container.size(); i++){
+		if (colors[i] == 0) {
+			uncolored.insert(i);
+		}
+	}
+}
+
 // prints graph on console
 void graph::print(){
 	for(int i=1; i < graph_container.size(); i++) {
@@ -75,7 +83,7 @@ int graph::max_degree(){
 
 // returns number of nodes 
 int graph::num_nodes(){
-	return graph_container.size();
+	return graph_container.size()-1;
 }
 
 // returns saturation of a given vertex
