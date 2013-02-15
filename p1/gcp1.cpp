@@ -49,26 +49,25 @@ double timeval_diff(struct timeval *a, struct timeval *b){
 // Output: The graph has all its vertexes colored.
 double greedyColoring(graph* graphInstance, int flag){
 	int n = graphInstance->num_nodes();
+	int i = 1; // index for first fit
 	int vertex, legalColor;
 	struct timeval t_ini, t_fin;
 	double secs;
 
 	gettimeofday(&t_ini, NULL);
-	for(int i=1;i <= n; i++){
+	for(int i=1; i<=n; i++){
 		if (flag == 0){
 			vertex = i; 								// for First Fit
 		} else if (flag == 1){
 			vertex = graphInstance->max_degree();		// for LDO
 		} else if (flag == 2){
-			vertex = graphInstance->max_incidence();	// for SDO
+			vertex = graphInstance->max_saturation();	// for SDO
 		} else if (flag == 3){
-			vertex = graphInstance->max_saturation();	// for IDO
+			vertex = graphInstance->max_incidence();	// for IDO
 		}
-			legalColor = getLegalColor(graphInstance,vertex);
-			graphInstance->set_color(vertex,legalColor);
-			//cout << legalColor << "-";
+		legalColor = getLegalColor(graphInstance,vertex);
+		graphInstance->set_color(vertex,legalColor);
 	}
-	//cout << endl;
 	gettimeofday(&t_fin, NULL);	
 	return timeval_diff(&t_fin, &t_ini);
 }

@@ -70,9 +70,9 @@ int graph::degree(int v){
 
 //returns uncolored vertex with max degree
 int graph::max_degree(){
-	int max = graph_container[1].size();
-	int vertex = 1;
-	for(int i=2; i<graph_container.size(); i++){
+	int max = 0;
+	int vertex;
+	for(int i=1; i<graph_container.size(); i++){
 		if (graph_container[i].size() > max && colors[i] == 0){
 			max = graph_container[i].size();
 			vertex = i;
@@ -100,9 +100,9 @@ int graph::saturation(int v){
 //returns uncolored vertex with max saturation
 int graph::max_saturation(){
 	int new_sat;
-	int max = saturation(1);
+	int max = 0;
 	int vertex = 1;
-	for(int i=2; i<graph_container.size(); i++){
+	for(int i=1; i<graph_container.size(); i++){
 		new_sat = saturation(i);
 		if ( new_sat > max && colors[i] == 0){
 			max = new_sat;
@@ -120,21 +120,23 @@ int graph::incidence(int v){
 			num_colored++;
 		}
 	}
+//	cout << "incidence: " << num_colored << endl;
 	return num_colored;
 }
 
 //return uncolored vertex with max incidence
 int graph::max_incidence(){
-	int new_sat;
-	int max = incidence(1);
+	int new_inc;
+	int max = 0;
 	int vertex = 1;
-	for(int i=2; i<graph_container.size(); i++){
-		new_sat = incidence(i);
-		if ( new_sat > max && colors[i] == 0){
-			max = new_sat;
+	for(int i=1; i<graph_container.size(); i++){
+		new_inc = incidence(i);
+		if ( new_inc > max && colors[i] == 0){
+			max = new_inc;
 			vertex = i;
 		}
 	}
+//	cout << "Max incidence: " << vertex << endl;
 	return vertex;
 
 }
