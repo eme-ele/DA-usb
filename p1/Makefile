@@ -1,13 +1,7 @@
-.PHONY: all clean
+all: gcp1 
 
-CPP = g++
-
-all: gcp1
+gcp1: gcp1_matrix.cpp
+	g++ -o gcp1 gcp1_matrix.cpp
 
 clean:
-	rm -f gcp1 *.o
-
-%.o: %.cpp
-	$(CPP) -c $< -o $@
-
-gcp1: graph.o 
+	rm -f gcp1 
