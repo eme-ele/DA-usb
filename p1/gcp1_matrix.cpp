@@ -273,14 +273,63 @@ double incidence_degree_ordering(){
 	}
 	gettimeofday(&t_fin, NULL);	
 	return timeval_diff(&t_fin, &t_ini);
-
-	
 }
+
+int get_uncolored(set<int>& uncolored) {
+	for(int i=1; i<color.size(); i++){
+		if (color[i] == 0) {
+			uncolored.insert(i);
+		}
+	}
+	return 0;
+}
+
+
+int greedy_independent_set(set<int>& independent, set<int>& uncolored){
+	set <int> u (uncolored);
+	int arbitrary_vertex;
+
+	while(!u.empty()){
+		arbitrary_vertex = *u.begin();
+		independent.insert(arbitrary_vertex); 
+		u.erase(arbitrary_vertex);
+		for(int j=1; j<instance.size(); j++) {
+			if (instance[arbitrary_vertex][j] == 1){
+				u.erase(j);
+			}
+		}
+	}
+	return 0;
+}
+
+double independent_set_based_coloring(){
+	set <int> uncolored; 
+	get_uncolored(uncolored);
+	int k = 1;
+	struct timeval t_ini, t_fin;
+	double secs;
+
+	gettimeofday(&t_ini, NULL);
+	while(!uncolored.empty()){
+		set<int> independent;
+		greedy_independent_set(independent, uncolored);
+		for(set<int>::iterator it = independent.begin(); it != independent.end(); ++it){
+			int vertex = *it;
+			color[vertex]= k;
+			uncolored.erase(vertex);
+		}
+		k++;		
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+}
+
+
 
 // calcula el numero de colores usados
 int diff_colors(){
 	set<int> dif;
-	for(int i =0; i<color.size();i++){
+	for(int i =1; i<color.size();i++){
 		dif.insert(color[i]);
 	}
 	return dif.size();
@@ -340,7 +389,7 @@ int main(int argc,char *argv[]){
 	}else if(strcmp(argv[1],"-b")==0){
 		// Run Independent Set Based Coloring Algorithm
 		cout<<endl<<"Ejecutando algoritmo Independent Set Based Coloring..."<<endl;
-	//	secs = independentSetBasedColoring(graphInstance);
+		secs = independent_set_based_coloring();
 		// TO DO
 	}else{
 		return -1;
