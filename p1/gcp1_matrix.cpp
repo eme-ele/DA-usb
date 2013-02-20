@@ -11,7 +11,19 @@
 #include <algorithm>
 
 
+/*
+	Ricardo Lunar 08-10655	
+	Maria Leonor Pacheco 07-41302
+
+	Proyecto # 1
+	Implementacion de Algoritmos Avidos para el 
+	Problema de Coloracion en Grafos. 
+*/
+
+
 using namespace std;
+
+/* ESTRUCTURA */
 
 // grafo y coloracion
 vector<vector<int> > instance;
@@ -25,7 +37,7 @@ struct Pair{
 
 };
 
-// propiedades de los vertices s
+// propiedades de los vertices
 vector<Pair> degree;
 vector<set <int> > saturation;
 vector<int> incidence;
@@ -90,6 +102,9 @@ int load_graph(string file) {
 	return 0;
 }
 
+/* FUNCIONES AUXILIARES */
+
+
 // obtiene el menor color posible para un vertice
 int getLegalColor(int vertex){
 	int i, valid, c;
@@ -120,21 +135,6 @@ double timeval_diff(struct timeval *a, struct timeval *b){
  	(double)(b->tv_sec + (double)b->tv_usec/1000000);
 }
 
-double first_fit(){
-	int n = instance.size();
-	int vertex, legalColor;
-	struct timeval t_ini, t_fin;
-	double secs;
-	gettimeofday(&t_ini, NULL);
-	for(int i=1; i<n; i++){
-		vertex = i;
-		legalColor = getLegalColor(vertex);
-		color[vertex] = legalColor;
-	}
-	gettimeofday(&t_fin, NULL);	
-	return timeval_diff(&t_fin, &t_ini);
-}
-
 // ordena los vertices de acuerdo a su grado
 int degree_ordering(){
 	degree.resize(instance.size()-1);
@@ -159,29 +159,12 @@ int degree_ordering(){
 int max_degree(){
 	int vertex;
 	int n = degree.size()-1;
-	for(int i=n; i>0; i--){
+	for(int i=n; i>=0; i--){
 		vertex = degree[i].vertex;
 		if(color[vertex] == 0){
 			return vertex;
 		}
 	}
-}
-
-
-double latest_degree_ordering(){
-	int n = color.size();
-	int vertex, legalColor;
-	struct timeval t_ini, t_fin;
-	double secs;
-	gettimeofday(&t_ini, NULL);
-	degree_ordering();
-	for (int i=n-1; i>0; i--){
-		vertex = max_degree();
-		legalColor = getLegalColor(vertex);
-		color[vertex] = legalColor;
-	}
-	gettimeofday(&t_fin, NULL);	
-	return timeval_diff(&t_fin, &t_ini);
 }
 
 // obtiene el vertice no coloreado con maxima saturacion
@@ -239,42 +222,7 @@ int update_neighbours_incidence(int vertex){
 	}
 }
 
-double saturation_degree_ordering(){
-	int n = color.size();
-	int legalColor, vertex;
-	struct timeval t_ini, t_fin;
-	double secs;
-	gettimeofday(&t_ini, NULL);
-	color[1] = 1;
-	update_neighbours_saturation(1, 1);
-	for (int i=2; i<n; i++){
-		vertex = max_saturation();
-		legalColor = getLegalColor(vertex);
-		color[vertex] = legalColor;
-		update_neighbours_saturation(vertex, legalColor);
-	}
-	gettimeofday(&t_fin, NULL);	
-	return timeval_diff(&t_fin, &t_ini);
-}
-
-double incidence_degree_ordering(){
-	int n = color.size();
-	int legalColor, vertex;
-	struct timeval t_ini, t_fin;
-	double secs;
-	gettimeofday(&t_ini, NULL);
-	color[1] = 1;
-	update_neighbours_incidence(1);
-	for (int i=2; i<n; i++){
-		vertex = max_incidence();
-		legalColor = getLegalColor(vertex);
-		color[vertex] = legalColor;
-		update_neighbours_incidence(vertex);
-	}
-	gettimeofday(&t_fin, NULL);	
-	return timeval_diff(&t_fin, &t_ini);
-}
-
+// crea conjunto de vertices no coloreados
 int get_uncolored(set<int>& uncolored) {
 	for(int i=1; i<color.size(); i++){
 		if (color[i] == 0) {
@@ -284,7 +232,7 @@ int get_uncolored(set<int>& uncolored) {
 	return 0;
 }
 
-
+// algoritmo para encontrar independent set
 int greedy_independent_set(set<int>& independent, set<int>& uncolored){
 	set <int> u (uncolored);
 	int arbitrary_vertex;
@@ -301,30 +249,6 @@ int greedy_independent_set(set<int>& independent, set<int>& uncolored){
 	}
 	return 0;
 }
-
-double independent_set_based_coloring(){
-	set <int> uncolored; 
-	get_uncolored(uncolored);
-	int k = 1;
-	struct timeval t_ini, t_fin;
-	double secs;
-
-	gettimeofday(&t_ini, NULL);
-	while(!uncolored.empty()){
-		set<int> independent;
-		greedy_independent_set(independent, uncolored);
-		for(set<int>::iterator it = independent.begin(); it != independent.end(); ++it){
-			int vertex = *it;
-			color[vertex]= k;
-			uncolored.erase(vertex);
-		}
-		k++;		
-	}
-	gettimeofday(&t_fin, NULL);	
-	return timeval_diff(&t_fin, &t_ini);
-}
-
-
 
 // calcula el numero de colores usados
 int diff_colors(){
@@ -350,6 +274,103 @@ int print_colors(){
 int print_use(){
 	cout << "Entrada invalida. Formato: ./gcp1 [ -f | -l | -s | -i | -b ] <Archivo de entrada>" << endl;
 	return 0;
+}
+
+
+/* ALGORITMOS */
+
+// algoritmo First Fit
+double first_fit(){
+	int n = instance.size();
+	int vertex, legalColor;
+	struct timeval t_ini, t_fin;
+	double secs;
+	gettimeofday(&t_ini, NULL);
+	for(int i=1; i<n; i++){
+		vertex = i;
+		legalColor = getLegalColor(vertex);
+		color[vertex] = legalColor;
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+}
+
+// algoritmo SDO 
+double saturation_degree_ordering(){
+	int n = color.size();
+	int legalColor, vertex;
+	struct timeval t_ini, t_fin;
+	double secs;
+	gettimeofday(&t_ini, NULL);
+	color[1] = 1;
+	update_neighbours_saturation(1, 1);
+	for (int i=2; i<n; i++){
+		vertex = max_saturation();
+		legalColor = getLegalColor(vertex);
+		color[vertex] = legalColor;
+		update_neighbours_saturation(vertex, legalColor);
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+}
+
+// algoritmo IDO 
+double incidence_degree_ordering(){
+	int n = color.size();
+	int legalColor, vertex;
+	struct timeval t_ini, t_fin;
+	double secs;
+	gettimeofday(&t_ini, NULL);
+	color[1] = 1;
+	update_neighbours_incidence(1);
+	for (int i=2; i<n; i++){
+		vertex = max_incidence();
+		legalColor = getLegalColor(vertex);
+		color[vertex] = legalColor;
+		update_neighbours_incidence(vertex);
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+}
+
+// algoritmo LDO
+double latest_degree_ordering(){
+	int n = color.size();
+	int vertex, legalColor;
+	struct timeval t_ini, t_fin;
+	double secs;
+	gettimeofday(&t_ini, NULL);
+	degree_ordering();
+	for (int i=1; i<n; i++){
+		vertex = max_degree();
+		legalColor = getLegalColor(vertex);
+		color[vertex] = legalColor;
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
+}
+
+// algoritmo Independent Set Based 
+double independent_set_based_coloring(){
+	set <int> uncolored; 
+	get_uncolored(uncolored);
+	int k = 1;
+	struct timeval t_ini, t_fin;
+	double secs;
+
+	gettimeofday(&t_ini, NULL);
+	while(!uncolored.empty()){
+		set<int> independent;
+		greedy_independent_set(independent, uncolored);
+		for(set<int>::iterator it = independent.begin(); it != independent.end(); ++it){
+			int vertex = *it;
+			color[vertex]= k;
+			uncolored.erase(vertex);
+		}
+		k++;		
+	}
+	gettimeofday(&t_fin, NULL);	
+	return timeval_diff(&t_fin, &t_ini);
 }
 
 
@@ -397,7 +418,7 @@ int main(int argc,char *argv[]){
 	cout << "\nTiempo: " << secs << endl;	
 	cout << "Numero de colores: " << diff_colors() << endl;
 	cout << "Vertice|Color: " << endl;
-	print_colors();	
+//	print_colors();	
 	
 	return 0;
 }
