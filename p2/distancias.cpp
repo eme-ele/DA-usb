@@ -13,15 +13,11 @@
 	Ricardo Lunar 08-10655	
 	Maria Leonor Pacheco 07-41302
 
-	Proyecto # 2
-	Evaluacion de metricas de distancia de Strings 
-	en el apareamiento de nombres y registros
 */
 
 using namespace std;
 
 map<string, int> memo_levenshtein;
-map<string, int> memo_matches;
 
 double get_min(double x, double y, double z){
 	return min(x, min(y, z));
@@ -63,6 +59,8 @@ double levenshtein(string a, int i, int len_a, string b, int j, int len_b) {
 	
 }
 
+// funcion que calcula la similitud jaro-winkler de dos strings 
+// retorna un valor entre 0 y 1
 double jaro_winkler(string a, int len_a, string b, int len_b) {
 
 	if (len_a == 0 || len_b == 0) {
