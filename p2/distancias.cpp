@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstring>
 
+#define NOCHAR -1
+
 /*
 	Ricardo Lunar 08-10655	
 	Maria Leonor Pacheco 07-41302
@@ -75,11 +77,13 @@ double jaro_winkler(string a, int len_a, string b, int len_b) {
 	int transpositions = 0;
 	int matches = 0;
 	char c, a_char, b_char; 
+	cout << a_char << endl;
 
 	while (a_pos < len_a || b_pos < len_b) {
 
 		// encontrar el siguiente match de a en b
-			while (a_pos < len_a) {
+		a_char = NOCHAR;
+		while (a_pos < len_a) {
 			c = a[a_pos];
 			for (int i = max(0, a_pos-match_window); i < min(len_b, a_pos+match_window); i++ ) {
 				if (a_seenin_b[i]) { continue; }
@@ -90,16 +94,17 @@ double jaro_winkler(string a, int len_a, string b, int len_b) {
 				}
 			}
 			a_pos++;
-			if (a_char != '\0') {
+			if (a_char != NOCHAR) {
 				break;
 			}				
 		}
 
 		// encontrar el siguiente match de b en a
+		b_char = NOCHAR;
 		while (b_pos < len_b){
 			c = b[b_pos];
 			for (int i = max(0, b_pos-match_window); i < min(len_a, b_pos+match_window); i++ ) {
-				if (a_seenin_b[i]) { continue; }
+				if (b_seenin_a[i]) { continue; }
 				if (c == a[i]) {
 					b_char = c;
 					b_seenin_a[i] = 1;
@@ -107,14 +112,14 @@ double jaro_winkler(string a, int len_a, string b, int len_b) {
 				}
 			}
 			b_pos++;
-			if (b_char != '\0') {
+			if (b_char != NOCHAR) {
 				break;
 			}		
 		}
 		
-		if (a_char == '\0' && b_char == '\0') { break; }
-		if (a_char != '\0' && b_char == '\0') { return 0;}
-		if (a_char == '\0' && b_char != '\0') { return 0;}
+		if (a_char == NOCHAR && b_char == NOCHAR) { break; }
+		if (a_char != NOCHAR && b_char == NOCHAR) { return 0;}
+		if (a_char == NOCHAR && b_char != NOCHAR) { return 0;}
 					
 		matches++;
 		if (a_char != b_char) { transpositions++; }
@@ -123,7 +128,7 @@ double jaro_winkler(string a, int len_a, string b, int len_b) {
 	if (matches == 0) { return 0;}
 
 	// calculo de la distancia jaro
-	double jaro_dist = 1/3*(matches/len_a + matches/len_b + (matches-transpositions)/matches);
+	double jaro_dist = 1/3.0*(matches/len_a + matches/len_b + (matches-transpositions)/matches);
 
 	// calculo de ajuste winkler
 	int common_subs = 0;
@@ -131,13 +136,13 @@ double jaro_winkler(string a, int len_a, string b, int len_b) {
 		common_subs += (a[i] == b[i]);
 	}
 
-	return jaro_dist + (common_subs*(1-jaro_dist));
+	return jaro_dist + (common_subs*0.1*(1-jaro_dist));
 }
 
 int main(int argc,char *argv[]){
 	string a = argv[1];
 	string b = argv[2];
-	cout << "levenshtein: " << levenshtein(a, 0, a.length(), b, 0, b.length()) << endl;
+	cout << "levenshtein: " << levenshtein(a, 0, a.length(), b, 0, b.length());
 	cout << "jaro-winkler: " << jaro_winkler(a, a.length(), b, b.length()) << endl;
 	return 0;
 }
