@@ -88,8 +88,12 @@ int make_pairs(vector<Pair>& distancias) {
 	map<string, vector<Objeto> >::iterator it;
 	it = relaciones.begin();
 	vector<Objeto> A = it->second;
+	cout << "Relacion " << it->first << ": " << A.size() << " objetos" << endl;
 	++it;
 	vector<Objeto> B = it->second;
+	cout << "Relacion " << it->first << ": " << B.size() << " objetos" << endl;
+	
+	cout << "Calculando distancias... " << endl;
 
 	for (int i=0; i<A.size(); i++) {
 		for(int j=0; j<B.size(); j++) {
@@ -109,7 +113,6 @@ int make_pairs(vector<Pair>& distancias) {
 	}
 
 	cout << distancias.size() << " distancias calculadas" << endl;
-	cout << relevantes << " instancias relevantes" << endl;
 
 }
 
@@ -128,8 +131,6 @@ double avg_prec(vector<Pair>& distancias, int metrica) {
 		acum_correctos = acum_correctos + correcto;
 		sumatoria = sumatoria + (acum_correctos*correcto)/(i+1.0);
 	}
-	cout << sumatoria << endl;
-	cout << acum_correctos << " ejemplos rankeados correctamente" << endl;
 	return sumatoria/relevantes;
 }
 
@@ -145,12 +146,15 @@ int main(int argc, char *argv[]){
 		print_use();
 		return -1;
 	}
+	cout << "Archivo: " << argv[1] << endl;
 	parse_file(argv[1]);
 
 	vector<Pair> distancias;
 	make_pairs(distancias);
-	cout << "levenshtein: " << avg_prec(distancias, 1) << endl;
-//	cout << "jaro: " << avg_prec(distancias, 4) << endl;
+	cout << "1000 pares de objetos recuperados y jerarquizados" << endl;
+	cout << "\nPrecision: " << endl;
+	cout << "\tLevenshtein: " << avg_prec(distancias, 1) << endl;
+	cout << "\tJaro: " << avg_prec(distancias, 4) << endl;
 }
 	
 

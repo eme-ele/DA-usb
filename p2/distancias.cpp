@@ -71,17 +71,23 @@ double jaro_winkler(string a, string b) {
 	}
 
 	if (matches == 0) { return 0;}
+	transpositions = transpositions/2;
 
 	// calculo de la distancia jaro
-	double jaro_dist = 1/3.0*(matches/len_a + matches/len_b + (matches-transpositions)/matches);
+	double jaro_dist = (matches/double(len_a) + matches/double(len_b) + (matches-transpositions)/double(matches))/3.0;
 
 	// calculo de ajuste winkler
 	int common_subs = 0;
 	for(int i = 0; i < min(len_a, len_b); i++) {
-		common_subs += (a[i] == b[i]);
+		if (i >= len_a || i >= len_b)
+			break;
+		if (a[i] != b[i])
+			break;
+		common_subs = i;
 	}
 
-	return jaro_dist + (common_subs*0.1*(1-jaro_dist));
+	return jaro_dist;
+	//return jaro_dist + (common_subs*0.1*(1-jaro_dist));
 }
 
 int levenshtein(const string &a, const string &b) {
