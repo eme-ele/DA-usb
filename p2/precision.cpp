@@ -19,24 +19,10 @@
 
 using namespace std;
 
-struct Objeto{
-	string clave;
-	string contenido;
-};
-
-struct Pair {
-	Objeto o1;
-	Objeto o2;
-	int leven;
-	double smith;
-	double monger;
-	double jaro;
-	int relevante;	
-};
-
 bool leven_ord (Pair i, Pair j) { return (i.leven<j.leven); }
+bool smith_ord (Pair i, Pair j) { return (i.smith>j.smith); }
+bool monger_ord (Pair i, Pair j) { return (i.monger>j.monger); }
 bool jaro_ord (Pair i, Pair j) { return (i.jaro>j.jaro); }
-
 
 // relaciones a ser comparadas y numero de pares relevantes
 map <string, vector<Objeto> > relaciones;
@@ -95,6 +81,9 @@ int make_pairs(vector<Pair>& distancias) {
 	
 	cout << "Calculando distancias... " << endl;
 
+    double score = 5.0;
+    double penalty = 1.0;
+
 	for (int i=0; i<A.size(); i++) {
 		for(int j=0; j<B.size(); j++) {
 			Pair p; 
@@ -102,7 +91,9 @@ int make_pairs(vector<Pair>& distancias) {
 			p.o2 = B[j];
 			p.relevante = 0;
 			p.leven = levenshtein(p.o1.contenido, p.o2.contenido);
-			p.jaro = jaro_winkler(p.o1.contenido, p.o2.contenido);
+            p.smith = smith_waterman(p.o1.contenido, p.o2.contenido, score, penalty, false);		
+            p.monger = monger_elkan(p.o1.contenido, p.o2.contenido, score, penalty);			
+            p.jaro = jaro_winkler(p.o1.contenido, p.o2.contenido);
 
 			if (p.o1.clave == p.o2.clave) {
 				p.relevante = 1;
@@ -111,14 +102,18 @@ int make_pairs(vector<Pair>& distancias) {
 			distancias.push_back(p);
 		}
 	}
-
+    cout<<endl;
 	cout << distancias.size() << " distancias calculadas" << endl;
 
 }
 
 double avg_prec(vector<Pair>& distancias, int metrica) {
 	if (metrica == 1)
-		sort(distancias.begin(), distancias.end(), leven_ord);		
+		sort(distancias.begin(), distancias.end(), leven_ord);
+    if (metrica == 2)
+        sort(distancias.begin(), distancias.end(), smith_ord);
+    if (metrica == 3)
+        sort(distancias.begin(), distancias.end(), monger_ord);
 	if (metrica == 4)
 		sort(distancias.begin(), distancias.end(), jaro_ord);
 
@@ -154,6 +149,8 @@ int main(int argc, char *argv[]){
 	cout << "1000 pares de objetos recuperados y jerarquizados" << endl;
 	cout << "\nPrecision: " << endl;
 	cout << "\tLevenshtein: " << avg_prec(distancias, 1) << endl;
+	cout << "\tSmith-Waterman: " << avg_prec(distancias, 2) << endl;
+	cout << "\tMonger-Elkan: " << avg_prec(distancias, 3) << endl;
 	cout << "\tJaro: " << avg_prec(distancias, 4) << endl;
 }
 	
