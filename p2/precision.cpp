@@ -19,15 +19,17 @@
 
 using namespace std;
 
+// funciones de ordenacion para jerarquizar
 bool leven_ord (Pair i, Pair j) { return (i.leven<j.leven); }
 bool smith_ord (Pair i, Pair j) { return (i.smith>j.smith); }
-bool monger_ord (Pair i, Pair j) { return (i.monger>j.monger); }
+bool monge_ord (Pair i, Pair j) { return (i.monge>j.monge); }
 bool jaro_ord (Pair i, Pair j) { return (i.jaro>j.jaro); }
 
 // relaciones a ser comparadas y numero de pares relevantes
 map <string, vector<Objeto> > relaciones;
 int relevantes = 0;
 
+// lee archivo y llena la estructura de relaciones
 int parse_file(string file) {
 	string nombre;
 	string clave;
@@ -70,6 +72,7 @@ int parse_file(string file) {
 	return 0;
 }
 
+// toma los pares AxB, calcula sus metricas y los marca si son relevantes
 int make_pairs(vector<Pair>& distancias) {
 	map<string, vector<Objeto> >::iterator it;
 	it = relaciones.begin();
@@ -92,8 +95,8 @@ int make_pairs(vector<Pair>& distancias) {
 			p.relevante = 0;
 			p.leven = levenshtein(p.o1.contenido, p.o2.contenido);
             p.smith = smith_waterman(p.o1.contenido, p.o2.contenido, score, penalty, false);		
-            p.monger = monger_elkan(p.o1.contenido, p.o2.contenido, score, penalty);			
-            p.jaro = jaro_winkler(p.o1.contenido, p.o2.contenido);
+            p.monge = monge_elkan(p.o1.contenido, p.o2.contenido, score, penalty);			
+            p.jaro = jaro(p.o1.contenido, p.o2.contenido);
 
 			if (p.o1.clave == p.o2.clave) {
 				p.relevante = 1;
@@ -107,13 +110,15 @@ int make_pairs(vector<Pair>& distancias) {
 
 }
 
+// jerarquiza de acuerdo a la metrica de entrada y
+// calcula la precision para los primeros 1000 pares
 double avg_prec(vector<Pair>& distancias, int metrica) {
 	if (metrica == 1)
 		sort(distancias.begin(), distancias.end(), leven_ord);
     if (metrica == 2)
         sort(distancias.begin(), distancias.end(), smith_ord);
     if (metrica == 3)
-        sort(distancias.begin(), distancias.end(), monger_ord);
+        sort(distancias.begin(), distancias.end(), monge_ord);
 	if (metrica == 4)
 		sort(distancias.begin(), distancias.end(), jaro_ord);
 
@@ -129,7 +134,7 @@ double avg_prec(vector<Pair>& distancias, int metrica) {
 	return sumatoria/relevantes;
 }
 
-// error message
+// mensaje de utilizacion del programa
 int print_use(){
 	cout << "Entrada invalida. Formato: ./precision <archivo de la instancia>" << endl;
 	return 0;

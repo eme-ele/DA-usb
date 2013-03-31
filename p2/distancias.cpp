@@ -5,6 +5,7 @@
 
 */
 
+// calcula la distancia de levenshtein entre dos strings
 int levenshtein(const string &a, const string &b) {
 	const int len_a(int(a.size()));
 	const int len_b(int(b.size()));
@@ -83,15 +84,15 @@ bool both_within_a_set(char x,char y){
 }
 
 // Retorna el valor de similaridad entre dos caracteres dados
-// considera 'match aproximado' planteado por monger en el paper
-// dado en la bibliografia ( http://pdf.aminer.org/000/473/089/the_field_matching_problem_algorithms_and_applications.pdf )
-double similarity_score(char a, char b, double score, double penalty, bool from_monger){
+// considera 'match aproximado' planteado por monge en el paper
+// dado en la bibliografia
+double similarity_score(char a, char b, double score, double penalty, bool from_monge){
     double result;
     if (a==b){
         result = score;
     }
     else{
-        if (from_monger && both_within_a_set(a,b)){
+        if (from_monge && both_within_a_set(a,b)){
             result = 2;
         }else
             result = -penalty;
@@ -112,7 +113,7 @@ double get_array_max(double array[],int len_t){
 
 // Calcula la distancia Smith-Waterman dados los strings, sus tamaños,
 // el puntaje y la penalización a considerar
-double smith_waterman(string a, string b, double score, double penalty, bool from_monger){
+double smith_waterman(string a, string b, double score, double penalty, bool from_monge){
     int len_a = a.length();
     int len_b = b.length();
 
@@ -128,7 +129,7 @@ double smith_waterman(string a, string b, double score, double penalty, bool fro
 
     for ( int i=1; i<=len_a; i++ ){
         for ( int j=1; j<=len_b; j++ ){
-            temp[0] = H[i-1][j-1] + similarity_score( a[i-1],b[j-1],score,penalty,from_monger );
+            temp[0] = H[i-1][j-1] + similarity_score( a[i-1],b[j-1],score,penalty,from_monge );
             temp[1] = H[i-1][j] - penalty;
             temp[2] = H[i][j-1] - penalty;
             temp[3] = 0.0;
@@ -154,7 +155,7 @@ double smith_waterman(string a, string b, double score, double penalty, bool fro
 
 // Calcula la distancia Monger-Elkan basado en el algoritmo
 // de Smith-Waterman
-double monger_elkan(string a, string b, double score, double penalty){
+double monge_elkan(string a, string b, double score, double penalty){
     
     return smith_waterman(a,b,score,penalty,true);
 
@@ -162,7 +163,7 @@ double monger_elkan(string a, string b, double score, double penalty){
 
 // funcion que calcula la similitud jaro-winkler de dos strings 
 // retorna un valor entre 0 y 1
-double jaro_winkler(string a, string b) {
+double jaro(string a, string b) {
 	int len_a = a.length();
 	int len_b = b.length();
 
@@ -231,16 +232,5 @@ double jaro_winkler(string a, string b) {
 	// calculo de la distancia jaro
 	double jaro_dist = (matches/double(len_a) + matches/double(len_b) + (matches-transpositions)/double(matches))/3.0;
 
-	// calculo de ajuste winkler
-	int common_subs = 0;
-	for(int i = 0; i < min(len_a, len_b); i++) {
-		if (i >= len_a || i >= len_b)
-			break;
-		if (a[i] != b[i])
-			break;
-		common_subs = i;
-	}
-
 	return jaro_dist;
-	//return jaro_dist + (common_subs*0.1*(1-jaro_dist));
 }
