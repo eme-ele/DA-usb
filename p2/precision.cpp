@@ -84,9 +84,12 @@ int make_pairs(vector<Pair>& distancias) {
 	
 	cout << "Calculando distancias... " << endl;
 
+	distancias.resize(A.size()*B.size());
+
     double score = 5.0;
     double penalty = 1.0;
 
+	int index = 0;
 	for (int i=0; i<A.size(); i++) {
 		for(int j=0; j<B.size(); j++) {
 			Pair p; 
@@ -102,7 +105,8 @@ int make_pairs(vector<Pair>& distancias) {
 				p.relevante = 1;
 				relevantes++;
 			} 
-			distancias.push_back(p);
+			distancias[index] = p;
+			index++;
 		}
 	}
     cout<<endl;
