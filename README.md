@@ -8,3 +8,7 @@ Coloracion de Grafos
 
 * [Enunciado del p2](http://ldc.usb.ve/~gpalma/ci5651em13/Proyecto2CI5651em13.pdf) : Evaluacion de metricas de distancias de Strings en
 el apareamiento de nombres y registros
+
+Diseño de Algoritmos II
+
+* Clustering : Heurísticas de trayectoria y heurísticas poblacionales para el problema de Data Clustering  
