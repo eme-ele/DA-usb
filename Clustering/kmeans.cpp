@@ -172,6 +172,7 @@ int main(int argc, char *argv[]){
 	string filename = argv[2];
 	int num_feats = atoi(argv[3]);
 	int is_still_moving = 1; 
+	int loop_count = 1; 
 
 	load_dataset(filename, num_feats);
 	
@@ -182,17 +183,20 @@ int main(int argc, char *argv[]){
 
 	init_clusters_centroids(num_clusters);
 	cout << "clusters inicializados" << endl;
-	print_dataset();
+	//print_dataset();
 	cout << endl << "centroides inicializados" << endl;
-	print_centroids();
+	//print_centroids();
+
 
 	while(is_still_moving) {
 		recalculate_centroids(num_clusters, num_feats);
 		is_still_moving = update_clusters(num_clusters, num_feats);
+		loop_count++;
 	}
 
 	cout << endl << "clustering terminado" << endl;
 	print_dataset();
+	cout << endl << loop_count << " iteraciones" << endl;
 
 
 }
