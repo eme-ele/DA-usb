@@ -6,7 +6,9 @@
 #include <cstring>
 #include <fstream>
 #include <set>
-#include <math.h>       
+#include <math.h> 
+#include <time.h>
+
 
 using namespace std;
 
@@ -19,10 +21,14 @@ vector<vector<double> > centroids;
 
 // inicializar clusters y fijar centroides iniciales
 int init_clusters_centroids(int num_clusters){
+	int random_num;
+	time_t seconds;
 	// escoger [num_clusters] ejemplos diferentes al azar
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
-		random_nums.insert(dataset.size() * rand() / (RAND_MAX + 1.)); 
+		time(&seconds);
+		srand((unsigned int) seconds);
+		random_nums.insert( rand() % (dataset.size() + 1)); 
 	}
 	// inicializar clusters y centroides 
 	int cluster_id = 1;
