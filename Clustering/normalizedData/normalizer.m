@@ -16,13 +16,13 @@
 % Normalizes data in the input filename between 0 and 1
 % Note: It does not normalize the class of the examples.
 function [] = normalizer(filename,outputfile,numAttr,startIn)
-    matrix = load(filename);
+    matrixAll = load(filename);
 
     attrAll = matrixAll(:,startIn:numAttr+startIn-1);
 
     i = 1;
 
-    [m,n] = size(attrIris);
+    [m,n] = size(attrAll);
     matrixNormAll = zeros(m,n+1);
     
     while(i<=numAttr)
