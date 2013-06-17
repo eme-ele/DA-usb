@@ -17,6 +17,31 @@ vector<vector<double> > dataset;
 int num_clusters;
 int num_feats;
 
+int print_centroids(vector<vector<double> > &representatives) {
+	for(int i=1; i<representatives.size(); i++){
+		for(int j=0; j<representatives[i].size(); j++) {
+			cout << representatives[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+int print_elem(vector<vector<double> > &container, int id) {
+	for(int i=0; i<container[id].size(); i++) {
+		cout << container[id][i] << " ";
+	}
+	cout << endl;
+	return 0;
+}
+
+int print_dataset(vector<int> &clusters) {
+	for(int i=0; i<dataset.size(); i++){
+		for(int j=0; j<dataset[i].size(); j++) {
+			cout << dataset[i][j] << " ";
+		}
+		cout << ": " << clusters[i] << endl;
+	}
+}
 
 double euclidean_distance(vector<double> &example, vector<double> &centroid) {
 	double distance; 
@@ -46,6 +71,11 @@ int init_representatives(vector<vector<double> > &representatives) {
 		random_nums.insert( rand() % (dataset.size() + 1)); 
 	}
 
+	/*set<int>::iterator iter;
+	for(iter=random_nums.begin(); iter!=random_nums.end();++iter) {
+		cout << *iter << endl;
+	}*/
+	
 	int cluster_id = 1;
 	for(set<int>::iterator it=random_nums.begin(); it!=random_nums.end(); ++it){
 		representatives[cluster_id] = dataset[*it];
@@ -54,33 +84,38 @@ int init_representatives(vector<vector<double> > &representatives) {
 	return 0; 
 }
 
-
 // intercambian una rep aleatoria de un cluster por un ejemplo al azar
 int random_swap(int &obsolete_cluster, int &added_cluster, vector<int> &clusters, vector<vector<double> > &representatives){
 	time_t seconds;
 	time(&seconds);
 	srand((unsigned int) seconds);
+	// por alguna extraña razon tengo que hacerlo dos veces para que difiera del random de init_representtaives
 	int random_example = rand() % (dataset.size() + 1);
-	int random_cluster = rand() % (representatives.size()+1);
+	random_example = rand() % (dataset.size() + 1);
+	
+	int random_cluster = rand() % (representatives.size());
+	if (random_cluster < 1)
+		random_cluster++;
 
-	cout << random_example << endl;
-	cout << random_cluster << endl;
+	/*cout << "ejemplo aleatorio: " << random_example << endl;
+	cout << "cluster a modificar: " << random_cluster << endl;
 
-	for(int i=0; i<representatives[random_cluster].size(); i++) {
-		cout << representatives[random_cluster][i] << " ";
-	}
 	cout << endl;
+
+	cout << "cambiando: "; 
+	print_elem(representatives, random_cluster);
+	cout << "por: ";
+	print_elem(dataset, random_example);*/
+
+	added_cluster = random_cluster; 
+	obsolete_cluster = clusters[random_example];
 
 	representatives[random_cluster] = dataset[random_example]; 
+	clusters[random_example] = random_cluster; 
 
-	for(int i=0; i<representatives[random_cluster].size(); i++) {
-		cout << representatives[random_cluster][i] << " ";
-	}
-	cout << endl;
-
-	obsolete_cluster = random_cluster;
-	added_cluster = clusters[random_example];
-
+	/*cout << "resultado: ";
+	print_elem(representatives, random_cluster);*/
+	
 	return 0;
 }
 
@@ -96,6 +131,7 @@ int assign_cluster(int example_id, vector<int> &clusters, vector<vector<double> 
 				current_cluster = j;
 			}
 	}
+
 	clusters[example_id] = current_cluster;
 	return 0;	
 }
@@ -111,17 +147,33 @@ int init_solution(vector<int> &clusters, vector<vector<double> > &representative
 int object_rejection(int cluster_id, vector<int> &clusters, vector<vector<double> > &representatives) {
 	for(int i=0; i<clusters.size(); i++){
 		if(clusters[i] == cluster_id) {
+			//cout << endl;
+			//print_elem(dataset, i);
+			//cout << "before rejection: " << clusters[i] << endl;
+			//cout << "previous distance to cluster " << cluster_id << " : " << euclidean_distance(dataset[i], representatives[cluster_id]) << endl;
 			assign_cluster(i, clusters, representatives);
+			//cout << "after rejection: " << clusters[i] << endl; 
+
 		}
 	}
 }
 
 int object_attraction(int cluster_id, vector<int> &clusters, vector<vector<double> > &representatives){
-	for(int i=0; i<clusters.size(); i++){
-		if(clusters[i] == cluster_id){
-			assign_cluster(i, clusters, representatives);
+	for(int i=0; i<dataset.size(); i++){
+	//	cout << endl;
+	//	print_elem(dataset, i);
+	//	cout << "before attraction: " << clusters[i] << endl;
+		if (clusters[i] != cluster_id) {
+			double current_distance = euclidean_distance(dataset[i], representatives[clusters[i]]); 
+			double attraction_distance = euclidean_distance(dataset[i], representatives[cluster_id]);
+			if (attraction_distance < current_distance) {			
+				clusters[i] = cluster_id;
+			} 
 		}
+	//	cout << "after atraction: " << clusters[i] << endl; 
+		
 	}
+	return 0;
 }
 
 int local_repartition(int obsolete_cluster, int added_cluster, vector<int> &clusters, vector<vector<double> > &representatives){
@@ -194,26 +246,6 @@ int load_dataset(string file) {
 	return 0;
 }
 
-int print_dataset(vector<int> &clusters) {
-	for(int i=0; i<dataset.size(); i++){
-		for(int j=0; j<dataset[i].size(); j++) {
-			cout << dataset[i][j] << " ";
-		}
-		cout << ": " << clusters[i] << endl;
-	}
-}
-
-int print_centroids(vector<vector<double> > &representatives) {
-	for(int i=1; i<representatives.size(); i++){
-		for(int j=0; j<representatives[i].size(); j++) {
-			cout << representatives[i][j] << " ";
-		}
-		cout << endl;
-	}
-}
-
-
-
 // mensaje de error 
 int print_use(){
 	cout << "Entrada invalida. Formato: ./ls [num_clusters] [data_file] [num_feats] [num_iter]" << endl;
@@ -243,41 +275,66 @@ int main(int argc, char *argv[]){
 	// fijar el tamaño de las estructuras
 	clusters.resize(dataset.size());
 	new_clusters.resize(dataset.size());
-	// no hay cluster "0", por lo que centroids[0] se ignora
+	// no hay cluster "0", por lo que centroids[0] y repr[0] se ignora
 	representatives.resize(num_clusters+1);	
 	new_representatives.resize(num_clusters+1);
 
 	init_representatives(representatives);
-	init_solution(clusters, representatives);
+	//cout << "centroids: " << endl;
+	//print_centroids(representatives);
 
-	new_clusters = clusters;
-	new_representatives = representatives; 
+
+	init_solution(clusters, representatives);
+	/*cout << "dataset: " << endl;
+	print_dataset(clusters);
+	cout << "\n\n\n\n" << endl;*/
+
+	int min_counter = 0; 
+
+	new_representatives = representatives;
+	new_clusters = clusters; 
+
+
+	double f = objective_function(representatives, clusters); 
+	cout << f << endl;
+	double new_f; 
 	
 	for(int i=0; i<num_iter; i++){
+
 		
 		//print_centroids(representatives);
-		//cout << endl;
+		//cout << endl << endl;		
 		random_swap(obsolete_cluster, added_cluster, new_clusters, new_representatives);
 		//print_centroids(new_representatives);
-		exit(-1);
+		//exit(-1);
 		local_repartition(obsolete_cluster, added_cluster, new_clusters, new_representatives);
+		//cout << obsolete_cluster << endl;
+		//cout << added_cluster << endl;
+		//exit(-1);
 		optimal_representatives(new_clusters, new_representatives);
 
 		// minimizar 
-		double f = objective_function(representatives, clusters);
-		double new_f = objective_function(new_representatives, new_clusters);
+		new_f = objective_function(new_representatives, new_clusters);
+		//cout  << new_f << endl;
+	//	exit(-1);
+		
 		//cout << f << " " << new_f << endl;
 		if(new_f < f ){
-			cout << f << " " << new_f << endl;
-			//cout << "minimice" << endl;
+			// seguir avanzando 
+			f = new_f;
+			cout << new_f << endl;
+			min_counter++;
 			representatives = new_representatives;
-			clusters = new_clusters;
+			clusters = new_clusters; 
+		} else {
+			new_representatives = representatives;
+			new_clusters = clusters; 
 		}
-
 	}
 
-//	print_dataset(clusters);
+	print_dataset(clusters);
 	cout << endl;
+	cout << "minimice " << min_counter << " veces" << endl;
 
 }
 
