@@ -8,6 +8,8 @@
 #include <set>
 #include <math.h> 
 #include <time.h>
+#include <random>
+#include <functional>
 
 using namespace std;
 
@@ -36,6 +38,7 @@ int print_elem(vector<vector<double> > &container, int id) {
 
 int print_dataset(vector<int> &clusters) {
 	for(int i=0; i<dataset.size(); i++){
+		cout << i << ": ";
 		for(int j=0; j<dataset[i].size(); j++) {
 			cout << dataset[i][j] << " ";
 		}
@@ -63,18 +66,15 @@ double objective_function(vector<vector<double> > &centroids, vector<int> &parti
 
 // inicializar representacion de clusters con ejemplos al azar
 int init_representatives(vector<vector<double> > &representatives) {
-	time_t seconds;
+	std::random_device rdev{};
+	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
+	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
+	auto generator = std::bind(distribution, engine);
+	
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
-		time(&seconds);
-		srand((unsigned int) seconds);
-		random_nums.insert( rand() % (dataset.size() + 1)); 
+		random_nums.insert( generator() ); 
 	}
-
-	/*set<int>::iterator iter;
-	for(iter=random_nums.begin(); iter!=random_nums.end();++iter) {
-		cout << *iter << endl;
-	}*/
 	
 	int cluster_id = 1;
 	for(set<int>::iterator it=random_nums.begin(); it!=random_nums.end(); ++it){
@@ -86,35 +86,23 @@ int init_representatives(vector<vector<double> > &representatives) {
 
 // intercambian una rep aleatoria de un cluster por un ejemplo al azar
 int random_swap(int &obsolete_cluster, int &added_cluster, vector<int> &clusters, vector<vector<double> > &representatives){
-	time_t seconds;
-	time(&seconds);
-	srand((unsigned int) seconds);
-	// por alguna extraña razon tengo que hacerlo dos veces para que difiera del random de init_representtaives
-	int random_example = rand() % (dataset.size() + 1);
-	random_example = rand() % (dataset.size() + 1);
+	std::random_device rdev{};
+	std::uniform_int_distribution<int> distribution_example(0, dataset.size()-1);
+	std::uniform_int_distribution<int> distribution_cluster(1, representatives.size()-1);
+	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
+	auto generator_example = std::bind(distribution_example, engine);
+	auto generator_cluster = std::bind(distribution_cluster, engine);
 	
-	int random_cluster = rand() % (representatives.size());
-	if (random_cluster < 1)
-		random_cluster++;
 
-	/*cout << "ejemplo aleatorio: " << random_example << endl;
-	cout << "cluster a modificar: " << random_cluster << endl;
-
-	cout << endl;
-
-	cout << "cambiando: "; 
-	print_elem(representatives, random_cluster);
-	cout << "por: ";
-	print_elem(dataset, random_example);*/
+// por alguna extraña razon tengo que hacerlo dos veces para que difiera del random de init_representtaives
+	int random_example = generator_example();	
+	int random_cluster = generator_cluster();
 
 	added_cluster = random_cluster; 
 	obsolete_cluster = clusters[random_example];
 
 	representatives[random_cluster] = dataset[random_example]; 
 	clusters[random_example] = random_cluster; 
-
-	/*cout << "resultado: ";
-	print_elem(representatives, random_cluster);*/
 	
 	return 0;
 }
@@ -126,6 +114,7 @@ int assign_cluster(int example_id, vector<int> &clusters, vector<vector<double> 
 
 	for(int j=1; j<num_clusters+1; j++) {
 			distance = euclidean_distance(dataset[example_id], representatives[j]);
+			cout << flush;
 			if (distance < best_min) {
 				best_min = distance; 
 				current_cluster = j;
@@ -147,31 +136,20 @@ int init_solution(vector<int> &clusters, vector<vector<double> > &representative
 int object_rejection(int cluster_id, vector<int> &clusters, vector<vector<double> > &representatives) {
 	for(int i=0; i<clusters.size(); i++){
 		if(clusters[i] == cluster_id) {
-			//cout << endl;
-			//print_elem(dataset, i);
-			//cout << "before rejection: " << clusters[i] << endl;
-			//cout << "previous distance to cluster " << cluster_id << " : " << euclidean_distance(dataset[i], representatives[cluster_id]) << endl;
 			assign_cluster(i, clusters, representatives);
-			//cout << "after rejection: " << clusters[i] << endl; 
-
 		}
 	}
 }
 
 int object_attraction(int cluster_id, vector<int> &clusters, vector<vector<double> > &representatives){
 	for(int i=0; i<dataset.size(); i++){
-	//	cout << endl;
-	//	print_elem(dataset, i);
-	//	cout << "before attraction: " << clusters[i] << endl;
 		if (clusters[i] != cluster_id) {
 			double current_distance = euclidean_distance(dataset[i], representatives[clusters[i]]); 
 			double attraction_distance = euclidean_distance(dataset[i], representatives[cluster_id]);
 			if (attraction_distance < current_distance) {			
 				clusters[i] = cluster_id;
 			} 
-		}
-	//	cout << "after atraction: " << clusters[i] << endl; 
-		
+		}	
 	}
 	return 0;
 }
@@ -248,7 +226,7 @@ int load_dataset(string file) {
 
 // mensaje de error 
 int print_use(){
-	cout << "Entrada invalida. Formato: ./ls [num_clusters] [data_file] [num_feats] [num_iter]" << endl;
+	cout << "Entrada invalida. Formato: ./ls [num_clusters] [data_file] [num_feats] [num_iter]" << endl << flush;
 	return 0;
 }
 
@@ -280,14 +258,10 @@ int main(int argc, char *argv[]){
 	new_representatives.resize(num_clusters+1);
 
 	init_representatives(representatives);
-	//cout << "centroids: " << endl;
 	//print_centroids(representatives);
 
-
 	init_solution(clusters, representatives);
-	/*cout << "dataset: " << endl;
-	print_dataset(clusters);
-	cout << "\n\n\n\n" << endl;*/
+	//print_dataset(clusters);
 
 	int min_counter = 0; 
 
@@ -301,28 +275,22 @@ int main(int argc, char *argv[]){
 	
 	for(int i=0; i<num_iter; i++){
 
-		
 		//print_centroids(representatives);
-		//cout << endl << endl;		
 		random_swap(obsolete_cluster, added_cluster, new_clusters, new_representatives);
 		//print_centroids(new_representatives);
 		//exit(-1);
 		local_repartition(obsolete_cluster, added_cluster, new_clusters, new_representatives);
-		//cout << obsolete_cluster << endl;
-		//cout << added_cluster << endl;
 		//exit(-1);
 		optimal_representatives(new_clusters, new_representatives);
 
 		// minimizar 
 		new_f = objective_function(new_representatives, new_clusters);
-		//cout  << new_f << endl;
 	//	exit(-1);
 		
-		//cout << f << " " << new_f << endl;
 		if(new_f < f ){
 			// seguir avanzando 
 			f = new_f;
-			cout << new_f << endl;
+			cout << new_f << " " << i << endl;
 			min_counter++;
 			representatives = new_representatives;
 			clusters = new_clusters; 
@@ -330,11 +298,12 @@ int main(int argc, char *argv[]){
 			new_representatives = representatives;
 			new_clusters = clusters; 
 		}
+		//representatives = new_representatives;
+		//clusters = new_clusters; 
+
 	}
 
 	print_dataset(clusters);
-	cout << endl;
-	cout << "minimice " << min_counter << " veces" << endl;
 
 }
 
