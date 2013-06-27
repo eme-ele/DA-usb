@@ -6,8 +6,10 @@
 #include <cstring>
 #include <fstream>
 #include <set>
-#include <math.h> 
-#include <time.h>
+#include <math.h>
+#include <random>
+#include <functional>
+
 
 
 using namespace std;
@@ -21,14 +23,14 @@ vector<vector<double> > centroids;
 
 // inicializar clusters y fijar centroides iniciales
 int init_clusters_centroids(int num_clusters){
-	int random_num;
-	time_t seconds;
-	// escoger [num_clusters] ejemplos diferentes al azar
+	std::random_device rdev{};
+	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
+	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
+	auto generator = std::bind(distribution, engine);
+	
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
-		time(&seconds);
-		srand((unsigned int) seconds);
-		random_nums.insert( rand() % (dataset.size() + 1)); 
+		random_nums.insert( generator() ); 
 	}
 	// inicializar clusters y centroides 
 	int cluster_id = 1;
@@ -94,6 +96,7 @@ int update_clusters(int num_clusters, int num_feats) {
 
 		for(int j=1; j<num_clusters+1; j++) {
 			distance = euclidean_distance(dataset[i], centroids[j], num_feats);
+			cout << flush;
 			if (distance < best_min) {
 				best_min = distance; 
 				current_cluster = j;
@@ -188,11 +191,6 @@ int main(int argc, char *argv[]){
 	centroids.resize(num_clusters+1);
 
 	init_clusters_centroids(num_clusters);
-	cout << "clusters inicializados" << endl;
-	//print_dataset();
-	cout << endl << "centroides inicializados" << endl;
-	//print_centroids();
-
 
 	while(is_still_moving) {
 		recalculate_centroids(num_clusters, num_feats);
@@ -200,7 +198,6 @@ int main(int argc, char *argv[]){
 		loop_count++;
 	}
 
-	cout << endl << "clustering terminado" << endl;
 	print_dataset();
 	cout << endl << loop_count << " iteraciones" << endl;
 
