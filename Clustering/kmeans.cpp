@@ -148,9 +148,9 @@ int load_dataset(string file, int num_feats) {
 int print_dataset() {
 	for(int i=0; i<dataset.size(); i++){
 		for(int j=0; j<dataset[i].size(); j++) {
-			cout << dataset[i][j] << " ";
+			cout << dataset[i][j] << ",";
 		}
-		cout << ": " << clusters[i] << endl;
+		cout << clusters[i] << endl;
 	}
 }
 
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]){
 	}
 
 	print_dataset();
-	cout << endl << loop_count << " iteraciones" << endl;
+	//cout << endl << loop_count << " iteraciones" << endl;
 
 
 }
