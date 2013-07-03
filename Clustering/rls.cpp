@@ -37,11 +37,10 @@ int print_elem(vector<vector<double> > &container, int id) {
 
 int print_dataset(vector<int> &clusters) {
 	for(int i=0; i<dataset.size(); i++){
-		cout << i << ": ";
 		for(int j=0; j<dataset[i].size(); j++) {
-			cout << dataset[i][j] << " ";
+			cout << dataset[i][j] << ",";
 		}
-		cout << ": " << clusters[i] << endl;
+		cout << clusters[i] << endl;
 	}
 }
 
