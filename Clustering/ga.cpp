@@ -18,6 +18,9 @@ typedef vector <double> Element;
 typedef vector< Element > Clustering;
 typedef vector< Clustering > Poblacion; 
 
+random_device rdev{};
+mt19937 engine{rdev()};
+
 vector< Element > dataset;
 
 int load_dataset(string file, int num_feats) {
@@ -56,9 +59,9 @@ int init_clustering(int num_clusters, Clustering &centroides){
 
 	centroides.resize(num_clusters);
 
-	random_device rdev{};
+	//random_device rdev{};
 	uniform_int_distribution<int> distribution(0, dataset.size()-1);
-	mt19937 engine{rdev()};
+	//mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 			
 	set<int> random_nums; 
@@ -139,7 +142,6 @@ double fitness(Clustering &centroides) {
 
 
 void optimal_representatives(vector<int> &clusters, Clustering &centroides){
-	cout << "optimal" << endl;
 	int num_feats = centroides[0].size();
 	Element totals;
 	totals.resize(num_feats);
@@ -185,9 +187,9 @@ void kmeans_2(Clustering &centroides){
 
 void crossover(Clustering &centroides, Clustering &mate, int num_clusters) {
 
-	random_device rdev{};
+	//random_device rdev{};
 	uniform_int_distribution<int> distribution(1, num_clusters-1);
-	mt19937 engine{rdev()};
+	//mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
 	int point1 = generator();
@@ -205,7 +207,7 @@ void crossover(Clustering &centroides, Clustering &mate, int num_clusters) {
 
 void mutar(int num_clusters, Clustering &centroides) {
 	
-	random_device rdev{};
+	//random_device rdev{};
 	uniform_int_distribution<int> distribution_centroides(0, num_clusters-1);
 	uniform_int_distribution<int> distribution_dataset(0, dataset.size()-1);
 	mt19937 engine{rdev()};
@@ -214,9 +216,6 @@ void mutar(int num_clusters, Clustering &centroides) {
 
 	int random_centroid = generator_centroides();
 	int random_example = generator_dataset();
-
-	cout << "cluster a modif: " << random_centroid << endl;
-	cout << "ejemplo: " << random_example << endl;
 
 	centroides[random_centroid] = dataset[random_example];
 	kmeans_2(centroides);
@@ -237,9 +236,9 @@ void pob_inicial(int tam_poblacion, int num_clusters, Poblacion &individuos) {
 }
 
 void seleccion(Clustering &individuo, Poblacion &individuos) {
-	random_device rdev{};
+	//random_device rdev{};
 	uniform_int_distribution<int> distribution(0, individuos.size()-1);
-	mt19937 engine{rdev()};
+	//mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
 	int competidor_1 = generator();
@@ -274,6 +273,16 @@ int print_use(){
 	return 0;
 }
 
+int print_dataset(vector<int> &clusters) {
+	for(int i=0; i<dataset.size(); i++){
+		for(int j=0; j<dataset[i].size(); j++) {
+			cout << dataset[i][j] << ",";
+		}
+		cout << clusters[i] << endl;
+	}
+}
+
+
 int main(int argc, char *argv[]){
 
 	if(argc != 8){
@@ -293,9 +302,9 @@ int main(int argc, char *argv[]){
 	load_dataset(filename, num_feats);	
 
 	// para generacion de numeros aleatorios
-	random_device rdev{};
+	//random_device rdev{};
 	uniform_int_distribution<int> distribution(1, 100);
-	mt19937 engine{rdev()};
+	//mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
 
@@ -305,51 +314,50 @@ int main(int argc, char *argv[]){
 	
 	for(int i=0; i<num_iteraciones; i++){
 
-		cout << "iteracion: " << i << endl;
-		getchar();
-		
 		Poblacion p_i;
 
 		int count = 1;
 		
 		while(p_i.size() < tam_poblacion ) {
-			cout << "while " << count << endl;
 			Clustering i_1, i_2;
 			init_clustering(num_clusters, i_1);
 			init_clustering(num_clusters, i_2);
 			seleccion(i_1, p_o);	
 			seleccion(i_2, p_o);
 
-			cout << "seleccion lista" << endl;
-			
 			if (generator() < prob_crossover) {
 				crossover(i_1, i_2, num_clusters);	
 			}
-			cout << "crossover listo" << endl;
-			
 
 			if (true) {
 				mutar(num_clusters, i_1);
 				mutar(num_clusters, i_2);
 			}
-			cout << "mutacion lista" << endl;
 			
 
 			p_i.push_back(i_1);
 			p_i.push_back(i_2);	
-
-			cout << "individuo agregado" << endl;
 
 			count++;
 			
 		}
 
 		p_o = p_i;
+		p_i.clear();
 		
 		
 	}
 
 	Clustering best;
-	best_solution(best, p_o);		
+	best_solution(best, p_o);	
+
+
+	vector<int> solucion_final;
+	solucion_final.resize(dataset.size());
+	create_solution(solucion_final, best);
+
+	print_dataset(solucion_final);
+
+	
 	
 }
