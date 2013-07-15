@@ -87,9 +87,14 @@ def main():
 
 	trainset = []
 	testset = []
-	for (t,o) in zip(trnfile, outfile):
+	comentario = re.compile(r'%.*(\n|$)')
+
+	for t in trnfile:
 		trainset.append(t)
-		testset.append(o)
+
+	for o in outfile:
+		if (re.match(comentario, o) is None):
+			testset.append(o)
 
 	(training,testing) = getSimilarSubsets(trainset,testset,numclusters)
 
