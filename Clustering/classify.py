@@ -6,7 +6,10 @@ def calculateSimilarity(setTrain,setTest):
     for example in setTrain:
         if example in setTest:
             sorted += 1.00
-    return 100*(sorted/(len(setTest)))
+    similarity = 0.00 
+    if (len(setTest) != 0.00):
+        similarity = 100*(sorted/(len(setTest)))
+    return similarity
 
 def getSubsets(set,numclusters):
     subsets = [[] for x in xrange(numclusters)]
@@ -19,14 +22,6 @@ def getSubsets(set,numclusters):
                 example = re.sub(r',\d+\n','',x)
                 subsets[i-1].append(example)
     return subsets 
-
-def get_length(trainSubsets,testSubsets):
-    print len(trainSubsets[0])
-    print len(trainSubsets[1])
-    print len(trainSubsets[2])
-    print len(testSubsets[0])
-    print len(testSubsets[1])
-    print len(testSubsets[2])
     
 def getFinalSimilarity(similarities,numclusters):
     finalSimilarity = []
@@ -68,8 +63,6 @@ def getSimilarSubsets(trainSet,testSet,numclusters):
     for i in range(0,numclusters):
         index = finalSimilarity[i];
         finalTestSubsets[i] = testSubsets[index]
-
-    get_length(trainSubsets,testSubsets)
     return (trainSubsets,finalTestSubsets)
 
 def calculatePrecision(training,testing):
