@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <set>
-#include <random>
 #include <functional>
 #include <math.h> 
 #include <string>
@@ -9,6 +8,7 @@
 #include <sstream>
 #include <fstream>
 #include <stdio.h>
+#include <random>
 
 
 // Imports for timing
@@ -16,6 +16,8 @@
 #include <ctime>
 
 using namespace std;
+
+random_device rdev{};
 
 // TIMING FUNCTIONS
 std::stack<clock_t> tictoc_stack;
@@ -37,10 +39,8 @@ typedef vector <double> Element;
 typedef vector< Element > Clustering;
 typedef vector< Clustering > Poblacion; 
 
-random_device rdev{};
-mt19937 engine{rdev()};
-
 vector< Element > dataset;
+
 
 int load_dataset(string file, int num_feats) {
 	
@@ -80,12 +80,13 @@ int init_clustering(int num_clusters, Clustering &centroides){
 
 	//random_device rdev{};
 	uniform_int_distribution<int> distribution(0, dataset.size()-1);
-	//mt19937 engine{rdev()};
+	mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 			
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
-		random_nums.insert( generator() ); 
+		int r = generator();
+		random_nums.insert( r ); 
 	}
 
 	int i = 0;
@@ -208,11 +209,14 @@ void crossover(Clustering &centroides, Clustering &mate, int num_clusters) {
 
 	//random_device rdev{};
 	uniform_int_distribution<int> distribution(1, num_clusters-1);
-	//mt19937 engine{rdev()};
+	mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
-	int point1 = generator();
-	int point2 = generator();
+	int random1 = generator();
+	int random2 = generator();
+
+	int point1 = min(random1, random2);
+	int point2 = max(random1, random2);
 
 	Clustering my_middle (centroides.begin()+point1, centroides.begin()+point2);
 	Clustering mate_middle (mate.begin()+point1, mate.begin()+point2);
@@ -257,7 +261,7 @@ void pob_inicial(int tam_poblacion, int num_clusters, Poblacion &individuos) {
 void seleccion(Clustering &individuo, Poblacion &individuos) {
 	//random_device rdev{};
 	uniform_int_distribution<int> distribution(0, individuos.size()-1);
-	//mt19937 engine{rdev()};
+	mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
 	int competidor_1 = generator();
@@ -324,7 +328,7 @@ int main(int argc, char *argv[]){
 	// para generacion de numeros aleatorios
 	//random_device rdev{};
 	uniform_int_distribution<int> distribution(1, 100);
-	//mt19937 engine{rdev()};
+	mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
 	tic();
@@ -332,18 +336,20 @@ int main(int argc, char *argv[]){
 
 	Poblacion p_o;
 	pob_inicial(tam_poblacion, num_clusters, p_o);
+
+	Poblacion p_i;
 	
 	
 	for(int i=0; i<num_iteraciones; i++){
 
-		Poblacion p_i;
-
 		int count = 1;
 		
 		while(p_i.size() < tam_poblacion ) {
+			
 			Clustering i_1, i_2;
 			init_clustering(num_clusters, i_1);
 			init_clustering(num_clusters, i_2);
+
 			seleccion(i_1, p_o);	
 			seleccion(i_2, p_o);
 
@@ -351,11 +357,10 @@ int main(int argc, char *argv[]){
 				crossover(i_1, i_2, num_clusters);	
 			}
 
-			if (true) {
+			if (generator() < prob_mutar) {
 				mutar(num_clusters, i_1);
 				mutar(num_clusters, i_2);
 			}
-			
 
 			p_i.push_back(i_1);
 			p_i.push_back(i_2);	

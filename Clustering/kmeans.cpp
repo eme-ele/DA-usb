@@ -18,8 +18,6 @@ using namespace std;
 
 // for random number generation 
 std::random_device rdev{};
-mt19937 engine{rdev()};
-
 
 // TIMING FUNCTIONS
 std::stack<clock_t> tictoc_stack;
@@ -45,6 +43,7 @@ vector<vector<double> > centroids;
 
 // inicializar clusters y fijar centroides iniciales
 int init_clusters_centroids(int num_clusters){
+	mt19937 engine{rdev()};
 	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
 	auto generator = std::bind(distribution, engine);
 	

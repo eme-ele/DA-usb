@@ -17,9 +17,7 @@
 
 using namespace std;
 
-// for random number generation 
 std::random_device rdev{};
-mt19937 engine{rdev()};
 
 
 // TIMING FUNCTIONS
@@ -89,12 +87,14 @@ double objective_function(vector<vector<double> > &centroids, vector<int> &parti
 
 // inicializar representacion de clusters con ejemplos al azar
 int init_representatives(vector<vector<double> > &representatives) {
+	mt19937 engine{rdev()};
 	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
 	auto generator = std::bind(distribution, engine);
 	
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
-		random_nums.insert( generator() ); 
+		int r = generator();
+		random_nums.insert( r ); 
 	}
 	
 	int cluster_id = 1;
@@ -107,6 +107,7 @@ int init_representatives(vector<vector<double> > &representatives) {
 
 // intercambian una rep aleatoria de un cluster por un ejemplo al azar
 int random_swap(int &obsolete_cluster, int &added_cluster, vector<int> &clusters, vector<vector<double> > &representatives){
+	mt19937 engine{rdev()};
 	std::uniform_int_distribution<int> distribution_example(0, dataset.size()-1);
 	std::uniform_int_distribution<int> distribution_cluster(1, representatives.size()-1);
 	auto generator_example = std::bind(distribution_example, engine);
