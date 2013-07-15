@@ -10,9 +10,31 @@
 #include <random>
 #include <functional>
 
-
+// Imports for timing
+#include <stack>
+#include <ctime>
 
 using namespace std;
+
+// for random number generation 
+std::random_device rdev{};
+mt19937 engine{rdev()};
+
+
+// TIMING FUNCTIONS
+std::stack<clock_t> tictoc_stack;
+
+void tic() {
+    tictoc_stack.push(clock());
+}
+
+void toc() {
+    std::cout << "% Time elapsed: "
+              << ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
+              << std::endl;
+    tictoc_stack.pop();
+}
+// END TIMING FUNCTIONS
 
 // indice del vector identifica ejemplo en dataset
 vector<vector<double> > dataset;
@@ -23,15 +45,14 @@ vector<vector<double> > centroids;
 
 // inicializar clusters y fijar centroides iniciales
 int init_clusters_centroids(int num_clusters){
-	std::random_device rdev{};
 	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
-	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
 	auto generator = std::bind(distribution, engine);
 	
 	set<int> random_nums; 
 	while(random_nums.size() < num_clusters) {
 		random_nums.insert( generator() ); 
 	}
+
 	// inicializar clusters y centroides 
 	int cluster_id = 1;
 	for(set<int>::iterator it=random_nums.begin(); it!=random_nums.end(); ++it){
@@ -113,9 +134,10 @@ int update_clusters(int num_clusters, int num_feats) {
 }
 
 // carga vectores de features de las instancias
-int load_dataset(string file, int num_feats) {
+int load_dataset(string file, int num_feats, int flag) {
 	
 	double feat;
+	int label;
 	ifstream data;
 	
 	data.open(file.c_str());
@@ -125,22 +147,38 @@ int load_dataset(string file, int num_feats) {
 			getline(data, line);
 			if (line.compare("") == 0)
 				break;
+			 if (line.substr(0, 1) == "%") {
+                continue;
+            }
 			vector<double> instance;
 			string word;
 			stringstream ss_line(line);
 			int count = 0;
-			while(getline(ss_line,word,',') && count < num_feats){
-				stringstream ss_double(word);
-				ss_double >> feat;
-				instance.push_back(feat);
+			while(getline(ss_line,word,',') && count <= num_feats){
+				// partiendo de una clasificacion inicial
+				if (count == num_feats && flag) {
+					stringstream ss_int(word);
+					ss_int >> label;
+					clusters.push_back(label);
+				}
+				// sin clasificacion
+				else if(count < num_feats) {
+					stringstream ss_double(word);
+					ss_double >> feat;
+					instance.push_back(feat);
+				}
 				count++;
 			}
 			dataset.push_back(instance);
 		}
 	} else {
 		cerr << "ERROR: No se pudo abrir el archivo" << endl;
-		exit(1);
 	}
+
+	if (!flag) {
+		clusters.resize(dataset.size());	
+	}
+	
 	data.close();
 	return 0;
 }
@@ -166,13 +204,13 @@ int print_centroids() {
 
 // mensaje de error 
 int print_use(){
-	cout << "Entrada invalida. Formato: ./kmeans [num_clusters] [data_file] [num_feats]" << endl;
+	cout << "Entrada invalida. Formato: ./kmeans [num_clusters] [data_file] [num_feats] [1 (opcional para tomar en cuenta clasificacion inicial)]" << endl;
 	return 0;
 }
 
 
 int main(int argc, char *argv[]){
-	if(argc != 4){
+	if(argc != 4 && argc != 5){
 		print_use();
 		return -1;
 	}
@@ -180,16 +218,26 @@ int main(int argc, char *argv[]){
 	int num_clusters = atoi(argv[1]);
 	string filename = argv[2];
 	int num_feats = atoi(argv[3]);
+	// empezar desde cero
+	int flag = 0; 
 	int is_still_moving = 1; 
 	int loop_count = 1; 
 
-	load_dataset(filename, num_feats);
-	
+	// empezar desde un optimo 
+	if(argc == 5){
+		flag = 1; 
+	}
+
+
+	load_dataset(filename, num_feats, flag);
 	// fijar el tamaño de las estructuras
-	clusters.resize(dataset.size());
+	
 	// no hay cluster "0", por lo que centroids[0] se ignora
 	centroids.resize(num_clusters+1);
 
+	tic();
+
+	init_clusters_centroids(num_clusters);
 	init_clusters_centroids(num_clusters);
 
 	while(is_still_moving) {
@@ -197,9 +245,11 @@ int main(int argc, char *argv[]){
 		is_still_moving = update_clusters(num_clusters, num_feats);
 		loop_count++;
 	}
+	
+	toc();
+	cout << "% Iteraciones: "<< loop_count << endl;	
 
 	print_dataset();
-	//cout << endl << loop_count << " iteraciones" << endl;
 
 
 }

@@ -10,7 +10,33 @@
 #include <random>
 #include <functional>
 
+
+// Imports for timing
+#include <stack>
+#include <ctime>
+
 using namespace std;
+
+// for random number generation 
+std::random_device rdev{};
+mt19937 engine{rdev()};
+
+
+// TIMING FUNCTIONS
+std::stack<clock_t> tictoc_stack;
+
+void tic() {
+    tictoc_stack.push(clock());
+}
+
+void toc() {
+    std::cout << "% Time elapsed: "
+              << ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
+              << std::endl;
+    tictoc_stack.pop();
+}
+// END TIMING FUNCTIONS
+
 
 // indice del vector identifica ejemplo en dataset
 vector<vector<double> > dataset;
@@ -64,9 +90,7 @@ double objective_function(vector<vector<double> > &centroids, vector<int> &parti
 
 // inicializar representacion de clusters con ejemplos al azar
 int init_representatives(vector<vector<double> > &representatives) {
-	std::random_device rdev{};
 	std::uniform_int_distribution<int> distribution(0, dataset.size()-1);
-	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
 	auto generator = std::bind(distribution, engine);
 	
 	set<int> random_nums; 
@@ -84,10 +108,8 @@ int init_representatives(vector<vector<double> > &representatives) {
 
 // intercambian una rep aleatoria de un cluster por un ejemplo al azar
 int random_swap(vector<int> &clusters, vector<vector<double> > &representatives){
-	std::random_device rdev{};
 	std::uniform_int_distribution<int> distribution_example(0, dataset.size()-1);
 	std::uniform_int_distribution<int> distribution_cluster(1, representatives.size()-1);
-	std::mt19937 engine{rdev()}; // Mersenne twister MT19937
 	auto generator_example = std::bind(distribution_example, engine);
 	auto generator_cluster = std::bind(distribution_cluster, engine);
 	
@@ -243,6 +265,8 @@ int main(int argc, char *argv[]){
 	representatives.resize(num_clusters+1);	
 	new_representatives.resize(num_clusters+1);
 
+	tic();
+
 	init_representatives(representatives);
 
 	init_solution(clusters, representatives);
@@ -252,7 +276,6 @@ int main(int argc, char *argv[]){
 
 
 	double f = objective_function(representatives, clusters); 
-	cout << f << endl;
 	double new_f; 
 	
 	for(int i=0; i<num_iter; i++){
@@ -264,7 +287,6 @@ int main(int argc, char *argv[]){
 		
 		if(new_f < f ){
 			f = new_f;
-			cout << new_f << " " << i << endl;
 			representatives = new_representatives;
 			clusters = new_clusters; 
 		} else {
@@ -272,6 +294,9 @@ int main(int argc, char *argv[]){
 			new_clusters = clusters; 
 		}
 	}
+
+	toc();
+	cout << "% Min Fitness: " << f << endl;
 
 	print_dataset(clusters);
 

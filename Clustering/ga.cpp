@@ -11,8 +11,27 @@
 #include <stdio.h>
 
 
+// Imports for timing
+#include <stack>
+#include <ctime>
 
 using namespace std;
+
+// TIMING FUNCTIONS
+std::stack<clock_t> tictoc_stack;
+
+void tic() {
+    tictoc_stack.push(clock());
+}
+
+void toc() {
+    std::cout << "% Time elapsed: "
+              << ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
+              << std::endl;
+    tictoc_stack.pop();
+}
+// END TIMING FUNCTIONS
+
 
 typedef vector <double> Element; 
 typedef vector< Element > Clustering;
@@ -265,6 +284,7 @@ void best_solution(Clustering &mejor, Poblacion &individuos) {
 			best_indiv = i;
 		}
 	}
+	cout << "% Min Fitness: " << best_fitness << endl;
 	mejor = individuos[best_indiv];
 }
 
@@ -306,6 +326,8 @@ int main(int argc, char *argv[]){
 	uniform_int_distribution<int> distribution(1, 100);
 	//mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
+
+	tic();
 
 
 	Poblacion p_o;
@@ -350,6 +372,8 @@ int main(int argc, char *argv[]){
 
 	Clustering best;
 	best_solution(best, p_o);	
+
+	toc();
 
 
 	vector<int> solucion_final;
