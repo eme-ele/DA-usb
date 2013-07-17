@@ -240,6 +240,13 @@ int print_use(){
 	return 0;
 }
 
+int print_clusters(vector<int> &clusters) {
+	for(int i=0; i<clusters.size(); i++){
+		cout << clusters[i] << " ";
+	}
+	cout << endl;
+}
+
 
 int main(int argc, char *argv[]){
 	if(argc != 5){
@@ -299,6 +306,7 @@ int main(int argc, char *argv[]){
 	cout << "% Min Fitness: " << f << endl;
 
 	print_dataset(clusters);
+	//print_clusters(clusters);
 
 }
 

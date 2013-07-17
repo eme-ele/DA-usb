@@ -218,30 +218,96 @@ void crossover(Clustering &centroides, Clustering &mate, int num_clusters) {
 	int point1 = min(random1, random2);
 	int point2 = max(random1, random2);
 
-	Clustering my_middle (centroides.begin()+point1, centroides.begin()+point2);
-	Clustering mate_middle (mate.begin()+point1, mate.begin()+point2);
+	if (point1 != point2) {
 
-	for(int i=point1; i<point2; i++) {
-		centroides[i] = mate_middle[i-point1];
-		mate[i] = my_middle[i-point1];
+		Clustering my_middle (centroides.begin()+point1, centroides.begin()+point2);
+		Clustering mate_middle (mate.begin()+point1, mate.begin()+point2);
+
+		for(int i=point1; i<point2; i++) {
+			centroides[i] = mate_middle[i-point1];
+			mate[i] = my_middle[i-point1];
+		}
+	
 	}
 
-};
+	else {
+		Clustering my_end (centroides.begin()+point1, centroides.end());
+		Clustering mate_end (mate.begin()+point1, mate.end());
 
-void mutar(int num_clusters, Clustering &centroides) {
+		for(int i=point1; i<centroides.size(); i++){
+			centroides[i] = mate_end[i-point1];
+			mate[i] = my_end[i-point1];
+		}
+	}
+
+}
+
+void crossover2(Clustering &centroides, Clustering &mate, int num_clusters){
+
+	Clustering cent_impares_my;
+	Clustering cent_pares_my;
+	Clustering cent_impares_mate;
+	Clustering cent_pares_mate;
+
+
+
+	for(int i=0; i<centroides.size(); i++){
+		if (i%2 ==0) {
+			cent_pares_my.push_back(centroides[i]);
+			cent_pares_mate.push_back(mate[i]);	
+		}
+		else {
+			cent_impares_my.push_back(centroides[i]);
+			cent_impares_mate.push_back(mate[i]);
+		}	
+	}
+	
+
+	int num = max(cent_pares_my.size(), cent_impares_my.size());
+
+	int ind1 = 0;
+	int ind2 = 0;
+
+	int a = 0;
+	int b = 0;
+
+	for(int i=0; i<num; i++) {
+		if (i%2 == 0) {
+			mate[ind2] = cent_pares_my[a]; ind2++; 
+			centroides[ind1] = cent_pares_mate[a]; ind1++; 
+			a++;
+		}
+		else {
+			mate[ind2] = cent_impares_my[b]; ind2++;
+			centroides[ind1] = cent_impares_mate[b]; ind1++;
+			b++;
+		}
+	}
+	
+	
+}
+
+void mutar(int num_clusters, Clustering &centroides, double prob_mutar) {
 	
 	//random_device rdev{};
-	uniform_int_distribution<int> distribution_centroides(0, num_clusters-1);
+	uniform_real_distribution<double> distribution_prob(0.0, 1.0);
 	uniform_int_distribution<int> distribution_dataset(0, dataset.size()-1);
 	mt19937 engine{rdev()};
-	auto generator_centroides = bind(distribution_centroides, engine);
+	auto generator_prob = bind(distribution_prob, engine);
 	auto generator_dataset = bind(distribution_dataset, engine);
 
-	int random_centroid = generator_centroides();
-	int random_example = generator_dataset();
+	int random_example;
 
-	centroides[random_centroid] = dataset[random_example];
-	kmeans_2(centroides);
+	for(int i=0; i<num_clusters;i++){
+		if (generator_prob() < prob_mutar){
+			random_example = generator_dataset();
+			centroides[i] = dataset[random_example];
+			kmeans_2(centroides);	
+	
+		}
+		
+	
+	}
 
 }
 
@@ -293,7 +359,7 @@ void best_solution(Clustering &mejor, Poblacion &individuos) {
 }
 
 int print_use(){
-	cout << "Entrada invalida. Formato: ./ga [num_clusters] [data_file] [num_feats] [num_iter] [tam_poblacion] [prob_mutar] [prob_crossover]" << endl << flush;
+	cout << "Entrada invalida. Formato: ./ga [num_clusters] [data_file] [num_feats] [num_iter] [tam_poblacion] [prob_crossover] [prob_mutar]" << endl << flush;
 	return 0;
 }
 
@@ -320,14 +386,14 @@ int main(int argc, char *argv[]){
 	int num_feats = atoi(argv[3]);
 	int num_iteraciones = atoi(argv[4]);	
 	int tam_poblacion = atoi(argv[5]);
-	double prob_mutar = atof(argv[6]);
-	double prob_crossover = atof(argv[7]);
+	double prob_crossover = atof(argv[6]);
+	double prob_mutar = atof(argv[7]);
 
 	load_dataset(filename, num_feats);	
 
 	// para generacion de numeros aleatorios
 	//random_device rdev{};
-	uniform_int_distribution<int> distribution(1, 100);
+	uniform_real_distribution<double> distribution(0.0, 1.0);
 	mt19937 engine{rdev()};
 	auto generator = std::bind(distribution, engine);
 
@@ -357,10 +423,8 @@ int main(int argc, char *argv[]){
 				crossover(i_1, i_2, num_clusters);	
 			}
 
-			if (generator() < prob_mutar) {
-				mutar(num_clusters, i_1);
-				mutar(num_clusters, i_2);
-			}
+			mutar(num_clusters, i_1, prob_mutar);
+			mutar(num_clusters, i_2, prob_mutar);
 
 			p_i.push_back(i_1);
 			p_i.push_back(i_2);	

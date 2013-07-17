@@ -250,6 +250,14 @@ int print_use(){
 	return 0;
 }
 
+int print_clusters(vector<int> &clusters) {
+	for(int i=0; i<clusters.size(); i++){
+		cout << clusters[i] << " ";
+	}
+	cout << endl;
+}
+
+
 
 int main(int argc, char *argv[]){
 	if(argc != 5){
