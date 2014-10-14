@@ -1,14 +1,15 @@
 DA-usb
 ======
 
-Diseño de Algoritmos I
+Repository for specialization courses in Algorithm Design, Simon Bolivar University. 
 
-* [Enunciado del p1](http://ldc.usb.ve/~gpalma/ci5651em13/Proyecto1CI5651em13.pdf) : Algoritmos Avidos para el Problema de
-Coloracion de Grafos
+DA I (Algorithm Design and Computational Complexity Theory)
 
-* [Enunciado del p2](http://ldc.usb.ve/~gpalma/ci5651em13/Proyecto2CI5651em13.pdf) : Evaluacion de metricas de distancias de Strings en
-el apareamiento de nombres y registros
+* [Enunciado del p1](http://ldc.usb.ve/~gpalma/ci5651em13/Proyecto1CI5651em13.pdf) : Greedy algorithms comparison for graph coloring.
 
-Diseño de Algoritmos II
+* [Enunciado del p2](http://ldc.usb.ve/~gpalma/ci5651em13/Proyecto2CI5651em13.pdf) : Evaluation of edit-distance metrics for object identification using dynamic programming techniques. 
 
-* Clustering : Heurísticas de trayectoria y heurísticas poblacionales para el problema de Data Clustering  
+
+DA II (Metaheuristic Optimization)
+
+* Clustering : A comparison between trajectory-based and population-based algorithms for data clustering.
